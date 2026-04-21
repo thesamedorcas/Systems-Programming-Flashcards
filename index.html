@@ -1,0 +1,1897 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Systems Programming — Flashcards</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Mono:wght@400;500&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --paper:#f5f0e8;--paper2:#ede7d9;--ink:#1a1612;--ink2:#4a3f35;
+  --ink3:#9a8e82;--rule:#d4c9b8;--pop:#1e5fc9;
+  --answer-bg:#e8eef8;--answer-ink:#1a2e4a;--answer-rule:#b0c9e8;
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+body{
+  background:var(--paper);color:var(--ink);font-family:'DM Sans',sans-serif;
+  min-height:100dvh;display:flex;flex-direction:column;
+  background-image:repeating-linear-gradient(to bottom,transparent,transparent 27px,var(--rule) 27px,var(--rule) 28px);
+  background-attachment:fixed;
+}
+.topbar{
+  background:var(--ink);color:var(--paper);padding:10px 24px;
+  display:flex;align-items:center;justify-content:space-between;
+  position:sticky;top:0;z-index:10;
+}
+.topbar-title{font-family:'DM Serif Display',serif;font-size:1.15rem;}
+.topbar-title em{font-style:italic;color:#c8b99a;}
+.topbar-counter{font-family:'DM Mono',monospace;font-size:0.7rem;color:#9a8e82;letter-spacing:0.08em;}
+.topbar-counter span{color:#f5f0e8;}
+.unit-strip{
+  background:var(--paper2);border-bottom:1px solid var(--rule);
+  padding:0 16px;display:flex;overflow-x:auto;
+  scrollbar-width:none;-webkit-overflow-scrolling:touch;
+}
+.unit-strip::-webkit-scrollbar{display:none;}
+.unit-tab{
+  flex-shrink:0;padding:10px 16px;font-family:'DM Mono',monospace;
+  font-size:0.72rem;letter-spacing:0.06em;color:var(--ink3);
+  background:transparent;border:none;border-bottom:2px solid transparent;
+  cursor:pointer;transition:color 0.12s,border-color 0.12s;white-space:nowrap;
+}
+.unit-tab:hover{color:var(--ink);}
+.unit-tab.active{color:var(--pop);border-bottom-color:var(--pop);font-weight:500;}
+.main{
+  flex:1;display:flex;flex-direction:column;align-items:center;
+  justify-content:center;padding:32px 24px 24px;gap:20px;
+}
+.progress-bar{width:100%;max-width:640px;height:2px;background:var(--rule);border-radius:1px;overflow:hidden;}
+.progress-fill{height:100%;background:var(--pop);transition:width 0.3s ease;}
+.card-scene{width:100%;max-width:640px;perspective:1400px;cursor:pointer;height:520px;}
+.card{
+  position:relative;width:100%;height:100%;
+  transform-style:preserve-3d;transition:transform 0.55s cubic-bezier(0.35,0,0.25,1);border-radius:3px;
+}
+.card.flipped{transform:rotateY(180deg);}
+.card-face{
+  position:absolute;inset:0;border-radius:3px;
+  backface-visibility:hidden;-webkit-backface-visibility:hidden;
+  display:flex;flex-direction:column;padding:24px 28px;
+  border:1px solid var(--rule);box-shadow:0 4px 18px rgba(26,22,18,0.10);
+  overflow:hidden;
+}
+.card-front{background:#fff;}
+.card-back{background:var(--answer-bg);transform:rotateY(180deg);border-color:var(--answer-rule);}
+.card-header{
+  display:flex;align-items:center;justify-content:space-between;
+  margin-bottom:14px;padding-bottom:10px;border-bottom:1px solid var(--rule);
+  flex-shrink:0;
+}
+.card-back .card-header{border-bottom-color:var(--answer-rule);}
+.card-type{font-family:'DM Mono',monospace;font-size:0.6rem;letter-spacing:0.14em;text-transform:uppercase;color:var(--ink3);}
+.card-back .card-type{color:#4a7ac9;}
+.card-unit{font-family:'DM Mono',monospace;font-size:0.6rem;color:var(--ink3);background:var(--paper2);padding:3px 8px;border-radius:2px;}
+.card-back .card-unit{background:#cad8ed;color:var(--answer-ink);}
+.card-body{flex:1;display:flex;align-items:center;justify-content:center;padding:4px 0 12px;overflow-y:auto;min-height:0;}
+.card-back .card-body{align-items:flex-start;}
+.card-text{font-family:'DM Sans',sans-serif;font-size:clamp(0.85rem,2.2vw,1rem);line-height:1.72;text-align:center;color:var(--ink);word-break:break-word;}
+.card-back .card-text{color:var(--answer-ink);font-size:0.82rem;text-align:left;line-height:1.6;width:100%;}
+.card-back .card-text b,.card-back .card-text strong{color:#1a3a6a;font-weight:600;}
+.card-back .card-text code{
+  font-family:'DM Mono',monospace;font-size:0.8em;
+  background:rgba(30,95,201,0.1);color:#1a3a6a;
+  padding:1px 4px;border-radius:2px;
+}
+.card-back .card-text pre{
+  font-family:'DM Mono',monospace;font-size:0.71rem;
+  background:rgba(26,46,74,0.07);color:#1a2e4a;
+  padding:8px 10px;border-radius:3px;
+  overflow-x:auto;margin:5px 0;
+  white-space:pre;line-height:1.45;
+  border-left:2px solid #b0c9e8;
+}
+.card-back .card-text ul{padding-left:16px;margin:3px 0;}
+.card-back .card-text li{margin:1px 0;}
+.card-mark{font-family:'DM Serif Display',serif;font-style:italic;font-size:3.5rem;line-height:1;color:var(--rule);position:absolute;bottom:14px;right:22px;user-select:none;pointer-events:none;}
+.card-back .card-mark{color:var(--answer-rule);}
+.card-hint{font-family:'DM Mono',monospace;font-size:0.65rem;color:var(--ink3);text-align:center;letter-spacing:0.04em;flex-shrink:0;}
+.nav{display:flex;align-items:center;gap:10px;width:100%;max-width:640px;}
+.nav-btn{
+  width:44px;height:44px;border-radius:2px;border:1px solid var(--rule);
+  background:#fff;color:var(--ink2);font-size:1rem;cursor:pointer;
+  display:flex;align-items:center;justify-content:center;
+  transition:all 0.12s;flex-shrink:0;-webkit-tap-highlight-color:transparent;
+}
+.nav-btn:hover{background:var(--ink);color:var(--paper);border-color:var(--ink);}
+.nav-btn:active{transform:scale(0.93);}
+.flip-btn{
+  flex:1;height:44px;border-radius:2px;border:1px solid var(--ink);
+  background:var(--ink);color:var(--paper);font-family:'DM Serif Display',serif;
+  font-style:italic;font-size:1rem;cursor:pointer;transition:all 0.12s;
+  -webkit-tap-highlight-color:transparent;
+}
+.flip-btn:hover{background:var(--pop);border-color:var(--pop);}
+.flip-btn:active{transform:scale(0.98);}
+.swipe-hint{font-family:'DM Mono',monospace;font-size:0.65rem;color:var(--ink3);letter-spacing:0.06em;}
+@keyframes fromRight{from{opacity:0;transform:translateX(28px)}to{opacity:1;transform:translateX(0)}}
+@keyframes fromLeft{from{opacity:0;transform:translateX(-28px)}to{opacity:1;transform:translateX(0)}}
+.slide-right .card{animation:fromRight 0.22s ease;}
+.slide-left .card{animation:fromLeft 0.22s ease;}
+@media(max-width:480px){.card-scene{height:580px;}.card-face{padding:16px 16px}.main{padding:16px 10px 12px}.topbar{padding:10px 14px}}
+</style>
+</head>
+<body>
+<div class="topbar">
+  <div class="topbar-title">Systems Programming <em>Flashcards</em></div>
+  <div class="topbar-counter" id="topCounter">---</div>
+</div>
+<div class="unit-strip" id="unitStrip"></div>
+<div class="main" id="main"></div>
+<script>
+const UNITS=[
+  {id:'all',label:'All Cards'},
+  {id:'Intro',label:'Introduction'},
+  {id:'BasicsC',label:'Basics of C'},
+  {id:'Memory',label:'Memory & Pointers'},
+  {id:'DynMem',label:'Dynamic Memory'},
+  {id:'DataStructs',label:'Data Structures'},
+  {id:'Debugging',label:'Debugging'},
+  {id:'Ownership',label:'Ownership & RAII'},
+  {id:'Energy',label:'Energy Efficiency'},
+  {id:'Concurrency',label:'Concurrency Concepts'},
+  {id:'CppThreads',label:'C++ Threading'},
+  {id:'Sync',label:'Synchronisation'},
+];
+
+const ALL_CARDS=[
+
+// ── INTRODUCTION ──────────────────────────────────────────────────────────────
+
+{u:'Intro',q:'What is Systems Programming?',
+a:`<b>Definition:</b> Writing computer <em>system software</em> used as a platform for other software — a layer of abstraction (scaffolding). The main "customer" is <em>other software</em>, not end users.<br><br>
+<b>Examples:</b> Operating Systems, Device Drivers, Compilers, System Libraries.<br><br>
+<b>Software stack (bottom → top):</b><br>
+Hardware → Operating System → Compilers → System Libraries → Middleware → Application Software<br><br>
+<b>Key property:</b> Systems programming languages allow <em>fine-grained control</em> over execution — fast execution time, low memory consumption, low energy usage.<br><br>
+<b>Contrasted with:</b> Application software (sits on top, uses the platform).`},
+
+{u:'Intro',q:'History of Systems Programming',
+a:`<b>1940s–early 1960s:</b> System software supplied by hardware manufacturers. One app used the entire machine. Languages: Fortran, LISP, COBOL. Grace Hopper wrote one of the first compilers (UNIVAC I, ~1960).<br><br>
+<b>Until 1970s:</b> System software written in processor-specific assembly.<br><br>
+<b>1970s:</b> Ritchie &amp; Thompson porting UNIX from PDP-7 → PDP-11. Tried B language, then invented <b>C</b> — an imperative language supporting structured programming.<br><br>
+<b>1980s:</b> Bjarne Stroustrup enriched C with OOP abstraction mechanisms → <b>C++</b>. Influenced by Simula (first OOP language).<br><br>
+<b>2010s:</b> <b>Rust</b> (2010) and <b>Swift</b> (2014) appeared — incorporating functional programming features, safer memory models.<br><br>
+<em>Pattern: people from different backgrounds thinking "we can do better!" drives language evolution.</em>`},
+
+{u:'Intro',q:'Programming Paradigms',
+a:`<b>Imperative:</b> Computations are sequences of statements that change program state. C, Python, Java.<br><br>
+<b>Structured:</b> Organises programs with subroutines and structured control flow (if/while/for). Eliminates goto. Foundation of C.<br><br>
+<b>Object-Oriented:</b> Organises into objects containing data and encapsulating behaviour. C++, Java, Python.<br><br>
+<b>Functional:</b> Programs are mathematical functions/expressions, avoiding explicit state change. Haskell, OCaml. Rust and C++ borrow many functional features.<br><br>
+<b>Note:</b> C supports imperative + structured. C++ adds OOP on top. Most modern systems languages blend paradigms.`},
+
+{u:'Intro',q:'C vs Python: Control and Precision',
+a:`<b>Python — x = 4</b><br>
+Dynamically typed: type of x could change at any time. Every operation tests operand types at runtime. <code>sys.getsizeof(x)</code> = 24 bytes for an int. Many instructions execute behind the scenes for a simple add.<br><br>
+<b>C — int x = 42;</b><br>
+Statically typed: type fixed at compile time. <code>sizeof(int)</code> = usually 4 bytes (32 bits). <code>x + 1</code> = 1 add instruction + 2 memory (mov) instructions.<br><br>
+<b>Implications:</b> C gives certainty and control — strong reasoning about performance and execution behaviour. Python introduces uncertainty. The C standard library implementation of integer addition starts at a well-defined instruction; Python's dispatches through a type-checking layer first.<br><br>
+<b>Energy:</b> Python requires far more instructions → far more cycles → far more energy.`},
+
+{u:'Intro',q:'Energy Efficiency by Language (Benchmarks)',
+a:`<b>Energy = Power × Time.</b> Fewer CPU cycles + fewer memory instructions = less energy.<br><br>
+<b>Normalised to C (C = 1.0):</b><br>
+<pre>Language   Time    Energy  Mem (peak)
+C          1.00    1.00    1.17
+Rust       1.04    1.03    1.54
+C++        1.56    1.34    1.34
+Java       1.89    1.98    6.01
+Haskell    3.55    3.10    2.45
+Python    71.90   75.88    2.80</pre>
+<b>Key insights:</b>
+<ul>
+<li>Systems languages (C, Rust, C++) are fastest and most energy-efficient</li>
+<li>Faster ≠ always most energy-efficient (see Haskell vs Fortran)</li>
+<li><em>Peak memory usage does not matter — memory access patterns do</em></li>
+<li>Python uses ~76× more energy than C</li>
+</ul>`},
+
+{u:'Intro',q:'Compiling a C Program',
+a:`<b>Stages:</b><br><br>
+<b>1. Preprocessor:</b> Expands macros and includes.<br>
+<code>#include &lt;stdio.h&gt;</code> and <code>#define PI 3.14</code> are resolved.<br><br>
+<b>2. Compiler (three sub-stages):</b><br>
+&nbsp;&nbsp;a) Parse source → intermediate representation (IR/LLVM)<br>
+&nbsp;&nbsp;b) Generate machine-specific assembly code (.s)<br>
+&nbsp;&nbsp;c) Assemble to machine code → object file (.o)<br><br>
+<b>3. Linker:</b> Combines multiple .o files into a single executable. Checks all called functions have machine code available (e.g. printf from libc). Reports "undefined symbol" if not found.<br><br>
+<b>Commands:</b>
+<pre>clang source.c -o program          # compile + link
+clang -Wall -Werror source.c -o p  # with warnings as errors</pre>
+<b>Flags:</b> <code>-Wall</code> enables most warnings. <code>-Werror</code> turns warnings into errors (use for coursework!). Treat the compiler as your friend — errors must be fixed, warnings must not be ignored.`},
+
+{u:'Intro',q:'Makefiles',
+a:`<b>GNU Make</b> automates compilation. Makefiles are <em>whitespace-sensitive</em> (commands must use a real TAB).<br><br>
+<b>Basic rule structure:</b>
+<pre>target: dependencies
+[TAB]command</pre>
+<b>Example:</b>
+<pre>program: source.c
+    clang -Wall -Werror source.c -o program</pre>
+<b>Multiple source files (only changed files recompile):</b>
+<pre>program: main.o helper.o
+    clang -Wall -Werror main.o helper.o -o program
+main.o: main.c
+    clang -Wall -Werror -c main.c
+helper.o: helper.c
+    clang -Wall -Werror -c helper.c</pre>
+<b>Typical layout:</b><br>
+Header files (.h) = interfaces / declarations<br>
+Source files (.c) = implementations / definitions<br>
+Driver (.c) = contains <code>main()</code><br><br>
+Run <code>make</code> (first rule) or <code>make target</code>.`},
+
+// ── BASICS OF C ───────────────────────────────────────────────────────────────
+
+{u:'BasicsC',q:'Data Types: Why They Matter',
+a:`<b>Problem:</b> A bit-pattern by itself has no inherent meaning.<br><br>
+<code>10000001</code> could mean:<br>
+<ul>
+<li>129 — unsigned 8-bit integer</li>
+<li>-127 — signed 8-bit integer (two's complement)</li>
+<li>-1 — 8-bit Minifloat</li>
+<li>A colour value, an ASCII character, ...</li>
+</ul>
+<b>Solution:</b> Data types give meaning to bits. We associate a bit pattern with a type (<code>int</code>, <code>float</code>, <code>char</code>) to tell the program what the bits represent.<br><br>
+<b>Data types also preserve meaning:</b> The compiler ensures computations preserve the meaningful representation and prevents meaningless operations via <em>type checking</em>.<br>
+<pre>x = x + "1";
+// error: invalid operands to binary + (have 'float' and 'char *')</pre>
+C is <em>statically typed</em> — every expression has a known type at compile time.`},
+
+{u:'BasicsC',q:'C Data Type Sizes and Ranges',
+a:`<b>Integer types (signed / unsigned):</b>
+<pre>char / unsigned char      1 byte   [-127,+127] / [0,255]
+short / unsigned short    2 bytes  [-32767,+32767] / [0,65535]
+int / unsigned int        4 bytes  [-2147483647,+2147483647] / [0,4294967295]
+long / unsigned long      4 or 8 bytes (≥ range of int)
+long long / unsigned ll   8 bytes  [-2^63−1, +2^63−1] / [0, 2^64−1]</pre>
+<b>Floating-point:</b>
+<pre>float (IEEE-754)   4 bytes   ±1.2×10⁻³⁸ to ±3.4×10³⁸
+double (IEEE-754)  8 bytes   ±2.3×10⁻³⁰⁸ to ±1.7×10³⁰⁸</pre>
+<b>Memory representations:</b>
+<pre>int x = 42;   // 00000000 00000000 00000000 00101010
+float f = 42; // 01000010 00101000 00000000 00000000</pre>
+<b>Key:</b> Choosing a smaller data type saves memory. 1 million temperatures as <code>char</code> vs <code>int</code> saves ~3 MB. Use <code>sizeof(type)</code> to check size on your platform.`},
+
+{u:'BasicsC',q:"Two's Complement and Integer Representation",
+a:`C stores signed integers using <b>two's complement</b> — the most common hardware representation.<br><br>
+<b>For an 8-bit signed integer:</b>
+<pre>Bit pattern   Unsigned   Signed (two's complement)
+0000 0000     0          0
+0000 0001     1          1
+0111 1111     127        127   (max positive)
+1000 0000     128        -128  (most negative!)
+1111 1111     255        -1</pre>
+<b>How two's complement works:</b> Flip all bits, add 1.
+<pre>42  = 0010 1010
+~42 = 1101 0101
++1  = 1101 0110  → this is -42</pre>
+<b>Range for n-bit signed integer:</b> −2^(n−1) to +2^(n−1) − 1<br>
+(e.g. 8-bit: −128 to +127; 32-bit: −2,147,483,648 to +2,147,483,647)<br><br>
+<b>Key consequences:</b>
+<ul>
+<li>There is one more negative value than positive (asymmetric range)</li>
+<li>Unsigned: <code>int x = INT_MAX; x++;</code> → wraps to 0 if unsigned (defined behaviour)</li>
+<li>Signed: <code>int x = INT_MAX; x++;</code> → <b>undefined behaviour</b> in C</li>
+<li>Casting between signed/unsigned reinterprets the same bits</li>
+</ul>`},
+
+{u:'BasicsC',q:'Variable Lifetime: Automatic, Static, Allocated',
+a:`Variables are stored at <em>fixed memory locations</em> that do not change over their lifetime.<br><br>
+<b>1. Automatic (stack):</b> Variables declared locally in a block <code>{}</code>. Lifetime ends when block exits. Memory automatically managed.
+<pre>int x = 42; // freed when block ends } </pre>
+<b>2. Static:</b> Declared with <code>static</code> keyword, or defined outside all blocks. Lifetime = entire program duration. Initialized only once.
+<pre>static int call_count = 0; // persists across function calls
+call_count++;</pre>
+<b>3. Allocated (heap):</b> Memory explicitly requested via <code>malloc()</code>. Programmer manages the lifetime — must call <code>free()</code>.
+<pre>int* p = malloc(sizeof(int)); // lives until free(p)</pre>
+<b>Stack memory:</b> Last-In-First-Out. On block entry <code>{</code>: allocate. On block exit <code>}</code>: free. Automatically managed, limited size (~1–8 MB).`},
+
+{u:'BasicsC',q:'Lexical Scope and Shadowing',
+a:`Each pair of curly braces <code>{}</code> introduces a <b>lexical scope</b>.<br><br>
+<b>Rules:</b>
+<ul>
+<li>Variable names must be unique within the same scope</li>
+<li>If the same name exists in nested scopes, the <em>innermost</em> scope is used — this is called <b>shadowing</b></li>
+</ul>
+<b>Example:</b>
+<pre>int main() {              int foo(int i) {
+  int i = 5;                int j = i;     // j = 5
+  {                         {
+    int j = foo(i);           int j = i+2; // shadows outer j
+    printf("%d\n", j); // 6   printf("%d\n", j); // prints 7
+  }                         }
+}                           return j + 1;  // outer j=5, returns 6
+                          }</pre>
+<b>Output:</b> 7 (from inside <code>foo</code>), then 6 (from inside <code>main</code>).<br><br>
+Shadowing is legal but can cause subtle bugs — compilers warn about it with <code>-Wshadow</code>.`},
+
+{u:'BasicsC',q:'Arrays in C',
+a:`Arrays: multiple elements of the <em>same type</em>, stored <em>contiguously</em> in memory.<br><br>
+<b>Declaration and initialisation:</b>
+<pre>int x[2] = {1, 2};
+printf("%d %d\n", x[0], x[1]); // 0-indexed</pre>
+<b>Stack arrays</b> must have a fixed size (known at compile time).<br><br>
+<b>Multi-dimensional (row-major order):</b>
+<pre>int matrix[2][3] = {{1,2,3},{4,5,6}};
+// stored: 1 2 3 4 5 6  — rows consecutive in memory</pre>
+<b>Arrays and pointers:</b> Array name = address of first element.
+<pre>int* ptr = vector;       // same as &vector[0]
+ptr[i]  ≡  *(ptr + i)   // equivalent expressions
+sizeof(vector) = 24      // 6 × 4 bytes
+sizeof(ptr) = 8          // pointer size</pre>
+<b>Cannot reassign an array:</b> <code>vector = other;</code> → compile error.<br><br>
+<b>Passed to functions:</b> only pointer to first element is copied — changes to elements <em>are</em> visible outside the function!`},
+
+{u:'BasicsC',q:'Structs in C',
+a:`A <code>struct</code> groups members of (potentially) different types, stored <em>contiguously in definition order</em>.<br><br>
+<b>Definition and usage:</b>
+<pre>struct point { int x; int y; };
+struct point p = {1, 2};
+printf("x=%d y=%d\n", p.x, p.y);</pre>
+<b>Shorthand with typedef:</b>
+<pre>typedef struct { int x; int y; } point;
+point p = {1, 2};</pre>
+<b>Member access:</b>
+<pre>p.x        // dot notation for struct values
+ptr->x     // arrow notation for struct pointers
+ptr->x  ≡  (*ptr).x</pre>
+<b>Structs are passed by value</b> to functions — changes to members inside a function are <em>NOT</em> visible outside.<br><br>
+<b>Self-referential structs</b> (for linked lists, trees):
+<pre>struct node { char value; struct node * next; };</pre>`},
+
+{u:'BasicsC',q:'Strings in C',
+a:`Strings in C are <b>arrays of <code>char</code> terminated by <code>'\\0'</code></b> (the null character).<br><br>
+<pre>char greeting[] = "Hello World";
+// equivalent to:
+char greeting[] = {'H','e','l','l','o',' ','W','o','r','l','d','\\0'};</pre>
+<b>Key rules:</b>
+<ul>
+<li>Double quotes <code>"..."</code> for string literals, single quotes <code>'c'</code> for char literals</li>
+<li><code>'\\0'</code> is automatically appended to string literals</li>
+<li>Print with <code>%s</code> format specifier</li>
+<li>No length property — use <code>strlen()</code> from <code>&lt;string.h&gt;</code></li>
+</ul>
+<b>Common string functions (from &lt;string.h&gt;):</b>
+<pre>strlen(s)         // length (excludes '\\0')
+strcmp(s1, s2)    // compare: 0 if equal
+strcpy(dst, src)  // copy src into dst
+strcat(dst, src)  // append src to dst</pre>
+<b>Danger:</b> If <code>'\\0'</code> is missing, <code>printf("%s")</code> reads past the end of the array — <em>undefined behaviour</em>!`},
+
+{u:'BasicsC',q:'Functions: Definition, Declaration, Call-by-Value',
+a:`<b>Definition</b> (fully specifies behaviour):
+<pre>int max(int lhs, int rhs) {
+  if (lhs > rhs) return lhs; else return rhs;
+}</pre>
+<b>Declaration</b> (interface only — tells compiler how to call it):
+<pre>int max(int lhs, int rhs); // in a header file</pre>
+The linker finds the definition later (may be in another .o or library).<br><br>
+<b>Call-by-value:</b> Arguments are <em>copied</em> into parameter variables.
+<pre>void set_to_zero(int x) { x = 0; }
+int y = 42;
+set_to_zero(y);
+printf("%d", y); // still 42 — only the copy was modified</pre>
+<b>Call-by-reference</b> (via pointers):
+<pre>void set_to_zero(int* ptr) { *ptr = 0; }
+set_to_zero(&y); // pass address — y becomes 0!</pre>
+<b>Special cases:</b> Structs are copied (pass-by-value). Arrays pass a pointer to the first element — changes <em>are</em> visible outside.`},
+
+{u:'BasicsC',q:'Header Files, printf, and scanf',
+a:`<b>Header files</b> (.h) hold declarations: function signatures, type definitions (structs, typedefs), constants/macros. Include with <code>#include "file.h"</code> or <code>#include &lt;file.h&gt;</code>.<br><br>
+<b>printf</b> — formatted output (from <code>&lt;stdio.h&gt;</code>):
+<pre>printf(format_string, arg1, arg2, ...);</pre>
+Format specifiers:
+<pre>%c   char          %s   string (char*)
+%d   signed int    %f   float/double
+%p   pointer       %ld  long int
+%6.2f  width 6, 2 decimal places</pre>
+Special characters: <code>\\n</code> newline, <code>\\t</code> tab, <code>\\0</code> null.<br><br>
+<b>scanf</b> — formatted input:
+<pre>int count;
+if (scanf("%d", &count) == EOF) { exit(-1); }
+// Pass ADDRESS of variable with &</pre>
+<b>main() return values:</b> 0 = success, non-zero = failure. In C99+, reaching end of <code>main</code> implicitly returns 0.`},
+
+{u:'BasicsC',q:'Boolean Values in C',
+a:`In C, <b>every integer can be used as a boolean</b>:
+<ul>
+<li><code>0</code> = <b>false</b></li>
+<li>Any non-zero value = <b>true</b></li>
+</ul>
+<b>Example:</b>
+<pre>int i = 5;
+while (i) {       // true as long as i != 0
+  i = i - 1;
+  printf("%d ", i); // prints 4 3 2 1 0
+}
+printf("done\\n");</pre>
+<b>Explicit booleans (C99+):</b>
+<pre>#include &lt;stdbool.h&gt;
+bool a = true;
+bool b = false;
+bool c = a && b;
+printf("%d\\n", c); // prints 0 (false)</pre>
+<code>true</code> and <code>false</code> are macros for <code>1</code> and <code>0</code>. Logical operators: <code>&&</code> (AND), <code>||</code> (OR), <code>!</code> (NOT). Comparison operators return <code>1</code> (true) or <code>0</code> (false).`},
+
+// ── MEMORY & POINTERS ─────────────────────────────────────────────────────────
+
+{u:'Memory',q:'Memory Organization and Byte Addressability',
+a:`<b>Think of memory as a very large 1D array.</b> Instead of indices, we use variable names.<br>
+<pre>int x = 42;      ≡  memory[0] = 42;
+int y = 23;      ≡  memory[1] = 23;</pre>
+<b>Byte addressability:</b> Every <em>byte</em> (8 bits) has its own unique address.<br><br>
+<b>64-bit architecture:</b> Addresses are 64 bits. Theoretically 2⁶⁴ = 16 exabytes addressable. In practice, x86-64 uses lower 48 bits → 2⁴⁸ = 256 TB.<br><br>
+To modify a single bit, you must load and store an entire byte.<br><br>
+<b>Memory energy hierarchy:</b>
+<pre>Registers: 0.5–1 ns,   0.04 pJ/bit
+Cache:     1–10 ns,    ~1 pJ/bit
+DRAM:      ~100 ns,    7 pJ/bit</pre>
+Moving data between CPU and DRAM can account for <b>&gt;60%</b> of system energy. Larger datatypes = more data to move = more energy. Efficient memory use reduces energy.`},
+
+{u:'Memory',q:'Pointers: Declaration, Address-of, Dereference',
+a:`A <b>pointer</b> is a variable that stores the <em>address</em> of another variable.<br><br>
+<b>Key operators:</b>
+<pre>&x   address-of: gets the address of variable x
+*p   dereference: accesses the value AT the address in p</pre>
+<b>Example:</b>
+<pre>int x = 42;
+int * ptr = &x;         // ptr holds address of x
+printf("%p\n", ptr);    // prints e.g. 0x7fff...
+printf("%d\n", *ptr);   // prints 42</pre>
+<b>Type rules:</b> A pointer to type <code>t</code> has type <code>t*</code>. Pointer size = always 8 bytes on 64-bit (stores an address).<br><br>
+<b>Pointers are normal variables</b> — stored at their own memory location:
+<pre>int ** ptr_to_ptr = &ptr; // pointer to a pointer
+ptr = &y;                 // can change where pointer points</pre>
+<b>Mnemonic:</b> <code>&</code> "goes right" (variable → address), <code>*</code> "goes left" (pointer → value).`},
+
+{u:'Memory',q:'NULL Pointers and const with Pointers',
+a:`<b>NULL pointer:</b> When no valid address exists, set to <code>NULL</code> (a macro for 0 / no address).
+<pre>float* result = search(val, arr, size);
+if (result == NULL) { /* not found */ }</pre>
+<b>Dereferencing NULL crashes the program</b> (segmentation fault)! Tony Hoare called NULL his "billion-dollar mistake."<br><br>
+<b>const with pointers — 3 forms:</b>
+<pre>// 1. Value pointed to is const (can't change *ptr):
+const float * ptr = &x;    // *ptr = 5.0 → error!
+
+// 2. Pointer itself is const (can't change ptr):
+float * const ptr = &x;    // ptr = &y → error!
+
+// 3. Both const:
+const float * const ptr = &x;</pre>
+<b>Rule of thumb:</b> Read right-to-left. <code>const float * ptr</code>: ptr is a pointer to const float.<br><br>
+The compiler enforces <code>const</code> — violation is a compile error. Use <code>const</code> to document intent and prevent accidental modification.`},
+
+{u:'Memory',q:'Call-by-Value vs Call-by-Reference (Memory View)',
+a:`<b>Call-by-value</b> — a copy is made:
+<pre>// Memory before call: [0x1000: 42]  (y=42)
+// During call:         [0x1000: 42] (y)  [0x1004: 42] (copy x)
+// After x=0:           [0x1000: 42] (y)  [0x1004: 0]  (copy=0)
+// After return:        [0x1000: 42] (y unchanged!)
+void set_to_zero(int x) { x = 0; }
+int y = 42; set_to_zero(y);
+printf("%d", y); // 42</pre>
+<b>Call-by-reference</b> — pass address, modify original:
+<pre>// ptr at 0x1004 holds value 0x1000 (address of y)
+// *ptr = 0 writes to address 0x1000 → y becomes 0
+void set_to_zero(int * ptr) { *ptr = 0; }
+set_to_zero(&y);
+printf("%d", y); // 0</pre>
+<b>Key insight:</b> In C all arguments are passed by value. "Call-by-reference" is simulated by passing a pointer (which is itself passed by value — a copy of the address).`},
+
+{u:'Memory',q:'Pointer Arithmetic',
+a:`Pointer arithmetic <b>automatically scales by the size of the pointed-to type</b>.<br><br>
+<b>Valid operations:</b>
+<pre>ptr + n    // move n elements forward
+ptr - n    // move n elements back
+ptr1 - ptr2  // number of elements between them
+ptr1 < ptr2  // compare positions</pre>
+<b>Invalid:</b> adding two pointers, multiplying pointers.<br><br>
+<b>Example:</b>
+<pre>int* i_ptr = &i;
+char* c_ptr = &c;
+i_ptr++;    // adds 4 bytes (1 × sizeof(int))
+c_ptr += 2; // adds 2 bytes (2 × sizeof(char))</pre>
+<b>Array traversal:</b>
+<pre>int vec[6] = {1,2,3,4,5,6};
+int* ptr = vec;
+while (ptr <= &vec[5]) {
+  printf("%d ", *ptr);
+  ptr++; // moves to next element
+}</pre>
+<code>ptr[i]</code> and <code>*(ptr + i)</code> are exactly equivalent. This is why arrays and pointers are closely related in C.`},
+
+// ── DYNAMIC MEMORY ────────────────────────────────────────────────────────────
+
+{u:'DynMem',q:'Stack vs Heap',
+a:`<b>Stack:</b>
+<ul>
+<li>Automatically managed (LIFO)</li>
+<li>Variable size must be known at <em>compile time</em></li>
+<li>On <code>{</code>: allocate. On <code>}</code>: free</li>
+<li>Fast, limited (~1–8 MB typically)</li>
+<li>Variables: automatic lifetime</li>
+</ul>
+<b>Heap:</b>
+<ul>
+<li>Manually managed by the programmer</li>
+<li>Size can be determined at <em>runtime</em></li>
+<li>Must explicitly <code>malloc()</code> and <code>free()</code></li>
+<li>Larger, slower allocation</li>
+<li>Variables: allocated lifetime</li>
+</ul>
+Stack and heap <b>share the same address space</b> and grow toward each other.<br><br>
+<b>When to use heap:</b> when size is unknown at compile time, when data must outlive the function that created it, or for large data structures.<br><br>
+<b>Pitfall:</b> Never return a pointer to a local stack variable — the memory is freed when the function returns!`},
+
+{u:'DynMem',q:'malloc() and free()',
+a:`Defined in <code>&lt;stdlib.h&gt;</code>:
+<pre>void* malloc(size_t size); // allocate size bytes
+void  free(void* ptr);     // release allocated memory</pre>
+<b>Allocating:</b>
+<pre>int * p = malloc(sizeof(int));        // single int
+if (p == NULL) { /* handle error */ } // ALWAYS check!
+*p = 42;
+
+int * arr = malloc(N * sizeof(int));  // array of N ints</pre>
+<b>Freeing:</b>
+<pre>free(arr);
+arr = NULL; // good practice: prevent use-after-free</pre>
+<b>Rules:</b>
+<ul>
+<li>malloc returns <code>void*</code> — implicitly converts to target type</li>
+<li>malloc does <em>NOT</em> initialise memory (contains garbage)</li>
+<li>Always check for <code>NULL</code> return</li>
+<li>Every malloc needs exactly one matching free</li>
+<li><code>free(NULL)</code> is safe (does nothing)</li>
+<li>Never double-free or use-after-free → undefined behaviour</li>
+</ul>
+<b>calloc:</b> <code>calloc(N, sizeof(int))</code> — allocates + zero-initialises.
+<b>realloc:</b> <code>realloc(ptr, new_size)</code> — resize allocation (may move data).`},
+
+{u:'DynMem',q:'Pitfall: Returning a Pointer to a Local Stack Variable',
+a:`A <b>dangling pointer</b> results from returning the address of a local (automatic) variable. The variable's memory is freed when the function returns — the caller is left pointing to freed memory.<br><br>
+<b>The bug:</b>
+<pre>int* broken() {
+  int x = 42;      // x lives on the stack
+  return &x;       // ERROR: x is freed when function returns!
+}
+
+int main() {
+  int* p = broken();
+  printf("%d\n", *p); // undefined behaviour — memory reused!
+}</pre>
+<b>Why it happens:</b> Local variables have <em>automatic lifetime</em> — they are allocated on the stack when the function is entered and freed when it exits. The address is valid <em>only</em> inside the function.<br><br>
+<b>Correct approaches:</b>
+<pre>// Option 1: allocate on the heap (caller must free!)
+int* correct() {
+  int* p = malloc(sizeof(int));
+  *p = 42;
+  return p;  // heap memory persists after return
+}
+
+// Option 2: pass a pointer in (caller owns the variable)
+void correct2(int* out) {
+  *out = 42;
+}</pre>
+<b>Compiler warning:</b> <code>-Wall</code> flags this as "function returns address of local variable" — never ignore it.`},
+
+{u:'DynMem',q:'Memory Leaks',
+a:`A <b>memory leak</b> occurs when allocated heap memory is never freed — the memory block is allocated but lost (no pointer to it).<br><br>
+<b>Common causes:</b>
+<pre>int* p = malloc(N * sizeof(int));
+// ... use p ...
+// FORGOT free(p) before function returns → LEAK
+// or:
+p = malloc(M * sizeof(int)); // old pointer overwritten → LEAK!</pre>
+<b>Consequences:</b>
+<ul>
+<li>Heap has finite memory — eventually exhausted</li>
+<li>Long-running programs (servers) are especially vulnerable</li>
+<li>Leaked memory wastes RAM → higher power consumption</li>
+<li>Program may crash with out-of-memory error</li>
+</ul>
+<b>Detection tools:</b><br>
+<code>valgrind --leak-check=full ./program</code><br>
+<code>clang -fsanitize=address ./program</code> (AddressSanitizer)<br><br>
+<b>Best practice:</b>
+<pre>free(ptr);
+ptr = NULL; // prevents accidental reuse after free</pre>`},
+
+// ── DATA STRUCTURES ───────────────────────────────────────────────────────────
+
+{u:'DataStructs',q:'Linked List with Pointers and Structs',
+a:`A singly linked list: nodes with a value and a pointer to the next node.<br><br>
+<b>Struct definition:</b>
+<pre>struct node {
+  char value;
+  struct node * next; // pointer to next node
+};</pre>
+<b>Creating on the stack:</b>
+<pre>struct node c = {'c', NULL}; // last node: next = NULL
+struct node b = {'b', &c};
+struct node a = {'a', &b};</pre>
+<b>Traversal:</b>
+<pre>struct node * ptr = &a;
+while (ptr) {              // NULL terminates loop
+  printf("%c\n", ptr->value); // -> dereferences + accesses
+  ptr = ptr->next;
+}</pre>
+<code>ptr-&gt;m</code> is shorthand for <code>(*ptr).m</code> — dereference then access member.<br><br>
+<b>Heap-allocated list (typical in practice):</b>
+<pre>struct node* new_node = malloc(sizeof(struct node));
+new_node->value = 'x';
+new_node->next = NULL;
+// ... when done:
+free(new_node);</pre>
+<b>Operations:</b> insertion O(1) at head, search O(n), delete requires predecessor pointer.`},
+
+{u:'DataStructs',q:'Binary Search Tree',
+a:`A BST maintains <em>ordered</em> data for efficient O(log n) search.<br><br>
+<b>Property:</b> left subtree values &lt; root value &lt; right subtree values.<br><br>
+<b>Struct:</b>
+<pre>struct node {
+  char value;
+  struct node * left_child;
+  struct node * right_child;
+};</pre>
+<b>Search (recursive):</b>
+<pre>struct node * find(char value, struct node * root) {
+  if (value == root->value) return root;
+  if (value < root->value && root->left_child != NULL)
+    return find(value, root->left_child);
+  if (value > root->value && root->right_child != NULL)
+    return find(value, root->right_child);
+  return NULL; // not found
+}</pre>
+<b>Complexity:</b> Search/insert/delete O(log n) balanced, O(n) worst case (skewed tree).<br>
+<b>Inorder traversal</b> (left → root → right) gives sorted sequence.<br>
+<b>Allocate nodes</b> on the heap with <code>malloc</code> — free recursively when destroying.`},
+
+{u:'DataStructs',q:'void* Pointers: Generic Code',
+a:`<code>void*</code> is a <b>generic pointer</b> — stores any address, type unknown. Every pointer type automatically converts to/from <code>void*</code>.<br><br>
+<b>Restriction:</b> Cannot dereference a <code>void*</code> directly — we don't know what the bits mean.<br><br>
+<b>Use case:</b> Generic functions that work on any data type.
+<pre>// Generic swap (swaps l bytes at addresses x and y):
+void swap(void *x, void *y, size_t l) {
+  char *a = x, *b = y, tmp;
+  while(l--) {
+    tmp = *a;
+    *a++ = *b;
+    *b++ = tmp;
+  }
+}
+// Usage:
+int i = 1, j = 2;
+swap(&i, &j, sizeof(int)); // works for any type!</pre>
+<b>size_t:</b> unsigned integer type for sizes. Result type of <code>sizeof</code>. Used as argument to <code>malloc</code>.<br><br>
+<b>Standard library uses void*:</b> <code>qsort()</code>, <code>bsearch()</code>, <code>malloc()</code>, <code>memcpy()</code> — all use <code>void*</code> for genericity.`},
+
+// ── DEBUGGING ─────────────────────────────────────────────────────────────────
+
+{u:'Debugging',q:'Syntactic vs Semantic Errors',
+a:`<b>Syntactic errors (compile-time):</b>
+<ul>
+<li>Caught by the compiler — prevent compilation</li>
+<li>Violations of C's grammar: missing semicolons, mismatched brackets, undeclared variables, type mismatches</li>
+<li>Must be fixed before the program can run</li>
+<li>Compiler tells you exactly where they are</li>
+</ul>
+<b>Semantic errors (logical errors):</b>
+<ul>
+<li>Code is syntactically valid but <em>logically wrong</em></li>
+<li>Compiler may not catch them</li>
+<li>Examples: off-by-one errors, using <code>=</code> instead of <code>==</code>, wrong algorithm, integer overflow</li>
+<li>Program compiles and runs but produces wrong results</li>
+</ul>
+<b>Runtime errors:</b>
+<ul>
+<li>Occur during execution: segmentation fault, division by zero, stack overflow</li>
+<li>Often caused by semantic errors</li>
+</ul>
+<b>Tip:</b> Use <code>-Wall -Werror</code> to catch many semantic issues at compile time. As you mature as a developer, you'll <em>want</em> more compile-time errors rather than runtime crashes.`},
+
+{u:'Debugging',q:'Segmentation Faults: Causes and Types',
+a:`A <b>segmentation fault</b> occurs when a program accesses memory it is not permitted to access. The OS terminates the program.<br><br>
+<b>Common causes:</b>
+<pre>// 1. Dereferencing NULL:
+int *p = NULL; *p = 5; // crash!
+
+// 2. Dangling pointer (use-after-free):
+int *p = malloc(4); free(p); *p = 5; // undefined!
+
+// 3. Buffer overflow (out-of-bounds write):
+int arr[5]; arr[10] = 1; // writes past end
+
+// 4. Stack overflow (infinite recursion):
+void foo() { foo(); } // stack fills up
+
+// 5. Heap overflow:
+int *p = malloc(4); p[100] = 1;
+
+// 6. Uninitialized pointer:
+int *p; *p = 5; // p has garbage address</pre>
+<b>C has NO bounds checking</b> on arrays — out-of-bounds access is undefined behaviour, not a guaranteed crash. It may silently corrupt data instead, making bugs hard to find.<br><br>
+Use <code>AddressSanitizer</code> (<code>-fsanitize=address</code>) to detect these at runtime.`},
+
+{u:'Debugging',q:'Undefined Behaviour',
+a:`<b>Undefined behaviour (UB):</b> the C standard places <em>no requirements</em> on what happens. The compiler can do anything — the program may work, crash, or silently corrupt data.<br><br>
+<b>Common examples:</b>
+<pre>// 1. Signed integer overflow (wraps, nasal demons, anything):
+int x = INT_MAX; x++; // UB
+
+// 2. Dereferencing invalid/uninitialized pointer:
+int *p; printf("%d", *p); // p = garbage address
+
+// 3. Uninitialized variable:
+int x; printf("%d", x); // garbage or UB
+
+// 4. Out-of-bounds access:
+int arr[3]; arr[5] = 1; // UB
+
+// 5. Use-after-free / double-free
+
+// 6. Modifying string literal:
+char *s = "hello"; s[0] = 'H'; // literals in read-only memory</pre>
+<b>Note:</b> <em>unsigned</em> integer overflow IS defined (wraps modulo 2ⁿ).<br><br>
+<b>Danger:</b> UB can cause silent data corruption, security vulnerabilities, or behaviour that changes with optimisation level. The compiler is allowed to <em>assume</em> UB never occurs, leading to surprising optimisations.`},
+
+{u:'Debugging',q:'Signed vs Unsigned Overflow',
+a:`<b>Unsigned integer overflow</b> — <em>defined behaviour</em> in C:<br>
+Wraps around modulo 2ⁿ (like a clock).
+<pre>unsigned int x = UINT_MAX; // 4294967295
+x++;                        // x = 0  (defined, wraps)</pre>
+<b>Signed integer overflow</b> — <em>undefined behaviour</em> in C:<br>
+The C standard does not define what happens. The compiler may assume it never occurs and optimise accordingly.
+<pre>int x = INT_MAX; // 2147483647
+x++;             // UB — do NOT rely on wrapping to -2147483648!</pre>
+<b>Why this matters in practice:</b>
+<pre>// Compiler may optimise away the overflow check!
+if (x + 1 > x) { /* always true? UB says compiler can assume yes */ }</pre>
+<b>Common traps:</b>
+<ul>
+<li>Loop counters that overflow: <code>for (int i = 0; i &lt;= INT_MAX; i++)</code> → infinite loop (UB)</li>
+<li>Mixing signed and unsigned in comparisons — implicit conversions can surprise you</li>
+<li><code>-1 &gt; 0u</code> evaluates to <code>true</code>! (-1 converts to a large unsigned value)</li>
+</ul>
+<b>Safe practice:</b> Use <code>unsigned</code> when values are inherently non-negative. Use <code>INT_MAX</code>/<code>UINT_MAX</code> from <code>&lt;limits.h&gt;</code> to check bounds.`},
+
+// ── OWNERSHIP & RAII ──────────────────────────────────────────────────────────
+
+{u:'Ownership',q:'Ownership and RAII',
+a:`<b>Ownership:</b> The concept of deciding <em>which</em> part of the code is responsible for freeing a resource. Every heap allocation should have a clear owner.<br><br>
+<b>RAII</b> (Resource Acquisition Is Initialization): A C++ technique that ties resource lifetime to the lifetime of a <em>stack variable</em> (object). When the stack variable goes out of scope, its destructor automatically releases the resource.<br><br>
+<b>Implementation:</b>
+<pre>struct ManagedResource {
+  Resource* res;
+  ManagedResource() { res = acquire_resource(); } // constructor
+  ~ManagedResource() { release_resource(res); }   // destructor
+};
+void foo() {
+  ManagedResource r; // resource acquired
+  // ... use r.res ...
+} // r goes out of scope: destructor called, resource released!</pre>
+<b>Benefits:</b>
+<ul>
+<li>No memory leaks — even if exceptions are thrown</li>
+<li>Resource always released when owner goes out of scope</li>
+<li>Combines ownership with object lifetime</li>
+</ul>
+Foundation of C++ smart pointers and containers (std::vector, std::string).`},
+
+{u:'Ownership',q:'C++ Smart Pointers',
+a:`Smart pointers implement RAII for heap memory. Defined in <code>&lt;memory&gt;</code>.<br><br>
+<b>std::unique_ptr — unique (sole) ownership:</b>
+<pre>#include &lt;memory&gt;
+auto p = std::make_unique&lt;int&gt;(42);
+// sole owner; auto-deletes when p goes out of scope
+// CANNOT be copied; CAN be moved:
+auto p2 = std::move(p); // transfers ownership; p is now null</pre>
+<b>std::shared_ptr — shared ownership:</b>
+<pre>auto p1 = std::make_shared&lt;int&gt;(42);
+auto p2 = p1;  // both share ownership
+// Reference count: incremented on copy, decremented on destruction
+// Memory freed when count reaches 0</pre>
+<b>std::weak_ptr — non-owning observer:</b>
+<pre>std::weak_ptr&lt;int&gt; wp = p1; // doesn't affect ref count
+// Use to break circular references (prevents ref-count deadlock)</pre>
+<b>Rule of thumb:</b>
+<ul>
+<li>Default: use <code>unique_ptr</code> (zero overhead)</li>
+<li>Shared ownership needed: use <code>shared_ptr</code></li>
+<li>Never use raw <code>new</code>/<code>delete</code> — use smart pointers or containers</li>
+</ul>`},
+
+// ── ENERGY EFFICIENCY ─────────────────────────────────────────────────────────
+
+{u:'Energy',q:'Energy, Power, and Sustainable Computing',
+a:`<b>Key metrics:</b>
+<ul>
+<li><b>Execution time:</b> how long a program takes (seconds)</li>
+<li><b>Power:</b> rate of energy consumption (Watts = Joules/second)</li>
+<li><b>Energy:</b> Power × Time (Joules) — what you pay for</li>
+<li><b>Carbon footprint:</b> CO₂ emissions from energy consumed</li>
+</ul>
+<b>Faster ≠ always less energy</b> (but usually correlated).<br><br>
+<b>Memory hierarchy energy:</b>
+<pre>CPU registers: ~0.04 pJ/bit,  0.5–1 ns
+Cache:         ~1 pJ/bit,     1–10 ns
+DRAM:          ~7 pJ/bit,     ~100 ns</pre>
+Moving data CPU ↔ DRAM can account for <b>&gt;60%</b> of system energy.<br><br>
+<b>Implications for C/C++ coding:</b>
+<ul>
+<li>Use smallest appropriate data type (char &lt; int &lt; double)</li>
+<li>Prefer sequential (cache-friendly) memory access over random</li>
+<li>Minimise unnecessary heap allocations</li>
+<li>Fewer instructions → less energy. Fewer memory instructions <em>especially</em> → less energy</li>
+<li>Pass by reference instead of by value for large structs</li>
+</ul>`},
+
+// ── CONCURRENCY CONCEPTS ──────────────────────────────────────────────────────
+
+{u:'Concurrency',q:'Concurrency vs Parallelism',
+a:`<b>Concurrency:</b> Multiple tasks that can be <em>in progress</em> at the same time. Tasks may interleave on a single core. About <em>structure and design</em>.<br><br>
+<b>Parallelism:</b> Multiple tasks <em>executing simultaneously</em> on multiple cores/processors. About <em>performance</em>.<br><br>
+All parallelism involves concurrency, but not all concurrency uses parallelism.<br><br>
+<b>Examples:</b>
+<ul>
+<li>Concurrent: web server handling 100 requests by interleaving them on 1 core</li>
+<li>Parallel: matrix multiplication split across 8 cores running simultaneously</li>
+</ul>
+<b>Concurrency challenges:</b>
+<ul>
+<li><b>Race conditions:</b> result depends on thread scheduling</li>
+<li><b>Deadlocks:</b> threads waiting for each other forever</li>
+<li><b>Livelocks:</b> threads keep changing state but make no progress</li>
+<li><b>Starvation:</b> a thread never gets CPU time</li>
+</ul>
+<em>Concurrency is about dealing with multiple things at once. Parallelism is about doing multiple things at once.</em>`},
+
+{u:'Concurrency',q:'Processes vs Threads',
+a:`<b>Process:</b>
+<ul>
+<li>Independent program execution unit</li>
+<li>Has its own <em>isolated</em> address space (memory)</li>
+<li>Has own file descriptors, heap, stack, code</li>
+<li>Context switch between processes is expensive</li>
+<li>Communication via IPC (pipes, sockets, shared memory)</li>
+</ul>
+<b>Thread:</b>
+<ul>
+<li>Lightweight unit within a process</li>
+<li><em>Shares</em> address space with all other threads in the process</li>
+<li>Has its own: stack, registers, program counter, thread ID</li>
+<li>Shares: heap, global variables, file descriptors, code segment</li>
+<li>Thread creation and switching is cheaper than process</li>
+<li>Communication via shared memory — but requires synchronisation!</li>
+</ul>
+<b>Key implication:</b> Threads communicate efficiently via shared variables — but concurrent access without synchronisation → <em>race conditions</em>. Must use locks/mutexes to protect shared state.<br><br>
+A process can contain many threads. All threads in a process see the same heap.`},
+
+{u:'Concurrency',q:'POSIX Threads (pthreads)',
+a:`POSIX threads: standard C threading API. Include <code>&lt;pthread.h&gt;</code>, link with <code>-lpthread</code>.<br><br>
+<b>Create and join:</b>
+<pre>pthread_t tid;
+pthread_create(&tid, NULL, thread_func, arg);
+// thread_func signature: void* (*)(void*)
+pthread_join(tid, &return_value); // blocks until done</pre>
+<b>Thread function + passing arguments:</b>
+<pre>typedef struct { int id; int count; } args_t;
+
+void* worker(void* arg) {
+  args_t* a = (args_t*)arg; // cast void* back
+  printf("Thread %d\n", a->id);
+  return NULL;
+}
+
+args_t args = {1, 100};
+pthread_create(&tid, NULL, worker, &args);</pre>
+<b>Thread lifecycle:</b> Created → Running ↔ Waiting → Terminated<br><br>
+<b>Key:</b> All threads share heap and globals. Changes by one thread are immediately visible to all others — this is why synchronisation is critical.`},
+
+{u:'Concurrency',q:'Race Conditions and Critical Regions',
+a:`A <b>race condition</b> occurs when the result of a computation depends on the relative timing/interleaving of threads accessing shared data.<br><br>
+<b>Classic example — counter++:</b>
+<pre>int counter = 0;
+// Both threads execute: counter++;
+
+// counter++ = 3 machine instructions:
+//   1. LOAD counter into register  (reads 0)
+//   2. ADD 1 to register
+//   3. STORE register back to counter
+
+// Interleaving:
+T1: LOAD (reads 0)
+T2: LOAD (reads 0)   ← both read before either writes!
+T1: ADD → reg = 1
+T2: ADD → reg = 1
+T1: STORE → counter = 1  ← should be 2!
+T2: STORE → counter = 1  ← LOST UPDATE!</pre>
+<b>Critical region</b> (critical section): code that accesses shared resources — must <em>not</em> be executed by more than one thread at a time.<br><br>
+<b>Solution: Mutual Exclusion</b> — ensure only one thread executes the critical section at a time. Implemented with locks/mutexes.`},
+
+{u:'Concurrency',q:'Mutexes and Mutual Exclusion',
+a:`A <b>mutex</b> (mutual exclusion lock) ensures only one thread executes a critical section at a time.<br><br>
+<b>POSIX mutex:</b>
+<pre>pthread_mutex_t lock = PTHREAD_MUTEX_INITIALIZER;
+
+pthread_mutex_lock(&lock);    // acquire — blocks if held by another thread
+// ─── critical section ───
+counter++;
+// ─────────────────────────
+pthread_mutex_unlock(&lock);  // release — wakes next waiter</pre>
+<b>C++ mutex (RAII-style):</b>
+<pre>#include &lt;mutex&gt;
+std::mutex mtx;
+{
+  std::lock_guard&lt;std::mutex&gt; guard(mtx); // auto-unlock at end of scope
+  counter++;
+}</pre>
+<b>Properties:</b>
+<ul>
+<li>Only one thread holds the lock at a time</li>
+<li><code>lock()</code> is blocking — caller waits if mutex is held</li>
+<li>The thread that locks must be the one that unlocks</li>
+<li>Locking an already-held mutex from the same thread → deadlock (use recursive mutex if needed)</li>
+</ul>
+<b>Best practice:</b> Keep critical sections as <em>short as possible</em> to minimise contention.`},
+
+{u:'Concurrency',q:'Deadlock',
+a:`<b>Deadlock:</b> Two or more threads each waiting for a resource held by the other — none can ever proceed.<br><br>
+<b>Classic example (two threads, two locks):</b>
+<pre>Thread 1: lock(A); lock(B); // waits for B
+Thread 2: lock(B); lock(A); // waits for A
+// Both wait forever!</pre>
+<b>Coffman conditions</b> — all 4 must hold for deadlock:
+<ol>
+<li><b>Mutual exclusion:</b> resources held exclusively</li>
+<li><b>Hold and wait:</b> thread holds one resource while waiting for another</li>
+<li><b>No preemption:</b> resources can't be forcibly taken away</li>
+<li><b>Circular wait:</b> T1 waits for T2, T2 waits for T1 (cycle)</li>
+</ol>
+<b>Prevention strategies:</b>
+<ul>
+<li><b>Lock ordering:</b> always acquire locks in the same global order</li>
+<li><b>Try-lock with timeout:</b> if can't acquire, release all held locks and retry</li>
+<li>Use condition variables to <em>release</em> locks while waiting</li>
+</ul>
+<b>Livelock:</b> threads keep changing state in response to each other but make no progress. Not deadlocked but still stuck.`},
+
+{u:'Concurrency',q:'Condition Variables',
+a:`A <b>condition variable</b> allows threads to wait for a condition to become true, without busy-waiting (spinning).<br><br>
+<b>Problem with busy-waiting:</b>
+<pre>while (buffer_empty) {} // wastes 100% CPU — spinning!</pre>
+<b>POSIX condition variables:</b>
+<pre>pthread_cond_t  cond = PTHREAD_COND_INITIALIZER;
+pthread_mutex_t lock = PTHREAD_MUTEX_INITIALIZER;
+
+// Consumer (waiter):
+pthread_mutex_lock(&lock);
+while (buffer_empty) {           // MUST be while, not if!
+  pthread_cond_wait(&cond, &lock); // atomically: unlock + sleep
+}                                // reacquires lock on wake
+consume_item();
+pthread_mutex_unlock(&lock);
+
+// Producer (signaler):
+pthread_mutex_lock(&lock);
+add_item();
+pthread_cond_signal(&cond);    // wake ONE waiter
+pthread_mutex_unlock(&lock);</pre>
+<b>Why <code>while</code> not <code>if</code>?</b> <em>Spurious wakeups</em> — a thread can wake without being signalled. Always re-check the condition in a loop!<br><br>
+<code>cond_wait</code> <em>atomically</em> releases the mutex and suspends — no race between checking and sleeping.`},
+
+// ── SYNCHRONISATION ───────────────────────────────────────────────────────────
+
+{u:'Sync',q:'Bounded Buffer (Producer-Consumer) Problem',
+a:`<b>Setup:</b> Shared buffer of size N. Producers add items; consumers remove items. Never add to full buffer; never remove from empty buffer.<br><br>
+<b>Correct solution (two condition variables):</b>
+<pre>mutex lock;
+cond_var not_full, not_empty;
+int count = 0, N = 10;
+
+Producer:
+  lock();
+  while (count == N) wait(not_full, lock); // wait if full
+  add_item(); count++;
+  signal(not_empty);  // wake a consumer
+  unlock();
+
+Consumer:
+  lock();
+  while (count == 0) wait(not_empty, lock); // wait if empty
+  remove_item(); count--;
+  signal(not_full);   // wake a producer
+  unlock();</pre>
+<b>Why a single condition variable is WRONG</b> with multiple producers/consumers:<br>
+A producer signals — but another <em>producer</em> wakes up (not a consumer), finds buffer full, sleeps again → all threads asleep → <b>deadlock</b>!<br><br>
+<b>Fix:</b> use <em>two</em> condition variables (<code>not_full</code> and <code>not_empty</code>), or use <code>broadcast</code> + <code>while</code> loop.`},
+
+{u:'Sync',q:'Monitors',
+a:`A <b>monitor</b> is a high-level synchronisation construct — a module or class with:<br>
+<ul>
+<li><b>Private shared data</b> (internal state)</li>
+<li><b>Methods with implicit mutual exclusion:</b> only one thread can be inside the monitor at a time</li>
+<li><b>Condition variables</b> for thread coordination</li>
+</ul>
+Monitors encapsulate the mutex + condition variable pattern into an object.<br><br>
+<b>C++ class implementing the monitor pattern:</b>
+<pre>class BoundedBuffer {
+  std::mutex mtx;
+  std::condition_variable not_full, not_empty;
+  std::queue&lt;int&gt; buf;
+  int maxSize;
+public:
+  void produce(int item) {
+    std::unique_lock&lt;std::mutex&gt; lk(mtx);
+    not_full.wait(lk, [&]{ return buf.size() &lt; maxSize; });
+    buf.push(item);
+    not_empty.notify_one();
+  }
+  int consume() {
+    std::unique_lock&lt;std::mutex&gt; lk(mtx);
+    not_empty.wait(lk, [&]{ return !buf.empty(); });
+    int v = buf.front(); buf.pop();
+    not_full.notify_one();
+    return v;
+  }
+};</pre>`},
+
+{u:'Sync',q:'Semaphores',
+a:`A <b>semaphore</b> is a synchronisation primitive with an integer counter and two atomic operations:<br>
+<ul>
+<li><b>P() / wait() / down():</b> decrement counter; if counter &lt; 0, block the calling thread</li>
+<li><b>V() / signal() / up():</b> increment counter; if counter ≤ 0, unblock one waiting thread</li>
+</ul>
+<b>Uses:</b>
+<ul>
+<li><code>Semaphore(1)</code> = <em>binary semaphore</em> = mutex</li>
+<li><code>Semaphore(N)</code> = allow up to N concurrent accesses to a resource</li>
+<li><code>Semaphore(0)</code> = signalling between threads (one-shot event)</li>
+</ul>
+<b>POSIX semaphores (from <code>&lt;semaphore.h&gt;</code>):</b>
+<pre>sem_t sem;
+sem_init(&sem, 0, 1);  // initial value = 1 (binary)
+sem_wait(&sem);         // P() — decrement / block
+// critical section
+sem_post(&sem);         // V() — increment / unblock
+sem_destroy(&sem);</pre>
+<b>Semaphore vs Mutex:</b> A mutex must be unlocked by the thread that locked it. A semaphore can be signalled by a <em>different</em> thread — useful for producer/consumer signalling.`},
+
+{u:'Sync',q:'Barriers and Atomics',
+a:`<b>Barrier:</b> All threads must reach the barrier before any can proceed past it. Used for phased parallel computation.<br>
+<pre>pthread_barrier_t b;
+pthread_barrier_init(&b, NULL, num_threads);
+// ... parallel work phase 1 ...
+pthread_barrier_wait(&b);  // blocks until ALL N threads arrive
+// ... parallel work phase 2 ...</pre>
+<b>Atomic operations:</b> Operations that appear instantaneous (indivisible) to all threads — no partial execution visible to others.<br><br>
+<b>Problem without atomics:</b> <code>counter++</code> is 3 instructions — can be interleaved (race condition).<br><br>
+<b>C++ atomics (from <code>&lt;atomic&gt;</code>):</b>
+<pre>std::atomic&lt;int&gt; counter{0};
+counter++;               // atomic increment — thread-safe!
+counter.fetch_add(1);    // returns old value
+counter.load();          // atomic read
+counter.store(5);        // atomic write</pre>
+<b>Advantages over mutexes:</b> lower overhead, lock-free (no deadlock possible), ideal for simple counters and flags.<br><br>
+<b>Limit:</b> Atomics guarantee indivisibility of a <em>single operation</em>. For compound read-modify-write sequences, still need locks.`},
+
+// ── C++ THREADING ─────────────────────────────────────────────────────────────
+
+{u:'CppThreads',q:'C++ Threads and Synchronisation',
+a:`<b>Creating threads (from <code>&lt;thread&gt;</code>):</b>
+<pre>std::thread t(function, arg1, arg2); // starts immediately
+t.join();     // wait for thread to finish (blocks)
+t.detach();   // let thread run independently (daemon)</pre>
+<b>Lambda:</b>
+<pre>std::thread t([&]() { counter++; }); // capture by reference
+t.join();</pre>
+<b>C++ mutex and locks:</b>
+<pre>#include &lt;mutex&gt;
+std::mutex mtx;
+
+// RAII lock_guard — automatically unlocks at scope end:
+std::lock_guard&lt;std::mutex&gt; guard(mtx);
+
+// unique_lock — more flexible, required for condition variables:
+std::unique_lock&lt;std::mutex&gt; lk(mtx);</pre>
+<b>C++ condition variables:</b>
+<pre>std::condition_variable cv;
+
+// Predicate form (automatically handles spurious wakeups):
+cv.wait(lk, []{ return !buffer.empty(); });
+
+cv.notify_one();  // wake one waiting thread
+cv.notify_all();  // wake all waiting threads</pre>
+<b>Threads vs Tasks:</b> Thread = explicit OS-scheduled execution unit. Task = logical unit of work (may run on thread pool). C++ tasks use <code>std::async</code>.`},
+
+{u:'CppThreads',q:'C++ Async Tasks and Futures/Promises',
+a:`<b>std::async</b> — launch task asynchronously, retrieve result via future:
+<pre>#include &lt;future&gt;
+
+std::future&lt;int&gt; result = std::async(std::launch::async, []() {
+  return expensive_computation();  // runs in another thread
+});
+
+// ... do other work ...
+
+int value = result.get(); // blocks until result is ready</pre>
+<b>Launch policies:</b>
+<pre>std::launch::async    // always creates new thread
+std::launch::deferred // lazy: runs in calling thread at .get()
+std::launch::async | std::launch::deferred // implementation decides</pre>
+<b>std::promise / std::future (manual):</b>
+<pre>std::promise&lt;int&gt; prom;
+std::future&lt;int&gt; fut = prom.get_future();
+
+std::thread t([&]() {
+  prom.set_value(42); // fulfil the promise
+});
+
+int val = fut.get(); // blocks until promise fulfilled → 42
+t.join();</pre>
+<b>shared_future:</b> Multiple threads can wait on the same result: <code>std::shared_future&lt;int&gt; sf = fut.share();</code><br><br>
+<b>Exception propagation:</b> If the async task throws, the exception is re-thrown when <code>.get()</code> is called.`},
+
+// ── ADDITIONAL: CODE PATTERNS & EXAM PRACTICE ─────────────────────────────────
+
+{u:'BasicsC',q:'sizeof Operator and Type Casting',
+a:`<b>sizeof:</b> Returns the size in bytes of a type or variable. Evaluated at compile time.
+<pre>sizeof(int)        // 4
+sizeof(double)     // 8
+sizeof(char)       // 1
+sizeof(int*)       // 8  (pointer, 64-bit)
+
+int arr[6];
+sizeof(arr)        // 24  (6 × 4) — works on arrays!
+sizeof(arr)/sizeof(arr[0])  // 6 — idiom for array length</pre>
+<b>Implicit type conversion (coercion):</b>
+<pre>int i = 3;
+double d = i;     // int → double: safe, no data loss
+int j = 3.9;      // double → int: truncates to 3 (no rounding!)</pre>
+<b>Explicit cast:</b>
+<pre>int a = 7, b = 2;
+double result = (double)a / b;  // 3.5 — cast before divide!
+double wrong  = (double)(a / b); // 3.0 — integer divide first!</pre>
+<b>Pointer casts:</b>
+<pre>void* p = malloc(sizeof(int));
+int* ip = (int*)p;   // cast void* to int* (safe after malloc)
+char* cp = (char*)ip; // reinterpret same memory as bytes</pre>
+<b>Common pitfall:</b> <code>int/int</code> always does integer division. Cast at least one operand to get floating-point result.`},
+
+{u:'BasicsC',q:'Static Variables: Detailed Behaviour',
+a:`The <code>static</code> keyword has <b>two distinct meanings</b> depending on context.<br><br>
+<b>1. Static local variable</b> — persists across function calls:
+<pre>int counter() {
+  static int count = 0;  // initialized ONCE, lives for program lifetime
+  count++;
+  return count;
+}
+// counter() → 1, counter() → 2, counter() → 3 ...</pre>
+<b>2. Static global / file-scope variable</b> — restricts visibility to the file:
+<pre>// file: helper.c
+static int secret = 42;  // only visible within helper.c
+// other .c files cannot access 'secret' even with extern</pre>
+<b>3. Static function</b> — limits function visibility to its file:
+<pre>static int internal_helper(int x) { return x * 2; }
+// Cannot be called from other .c files</pre>
+<b>Key properties of static storage:</b>
+<ul>
+<li>Stored in BSS/data segment (not stack or heap)</li>
+<li>Zero-initialized by default if no initializer given</li>
+<li>Lifetime = entire program duration</li>
+<li>Static local: scope is still local, but storage persists</li>
+</ul>`},
+
+{u:'BasicsC',q:'Common C Bugs: Spot and Fix',
+a:`<b>1. Assignment instead of comparison:</b>
+<pre>if (x = 5) { ... }   // BUG: assigns 5 to x (always true!)
+if (x == 5) { ... }  // FIX</pre>
+<b>2. Off-by-one in loops:</b>
+<pre>int arr[5];
+for (int i = 0; i <= 5; i++) arr[i] = 0; // BUG: arr[5] is OOB!
+for (int i = 0; i &lt; 5; i++) arr[i] = 0;  // FIX</pre>
+<b>3. Missing break in switch:</b>
+<pre>switch(x) {
+  case 1: printf("one");  // falls through to case 2!
+  case 2: printf("two"); break; // FIX: add break after case 1
+}</pre>
+<b>4. Forgetting null terminator:</b>
+<pre>char s[5] = {'h','e','l','l','o'}; // BUG: no '\0'!
+char s[6] = {'h','e','l','l','o','\0'}; // FIX</pre>
+<b>5. scanf without address-of:</b>
+<pre>int x; scanf("%d", x);   // BUG: passes value, not address!
+        scanf("%d", &x); // FIX</pre>
+<b>6. Using pointer before checking NULL:</b>
+<pre>int* p = malloc(sizeof(int));
+*p = 5;                    // BUG: p might be NULL!
+if (p) { *p = 5; }        // FIX: check first</pre>`},
+
+{u:'Memory',q:'Pointer-to-Pointer (int**): Modifying Pointers Inside Functions',
+a:`When a function needs to <b>change where a pointer points</b> (not just the value it points to), pass a pointer-to-pointer.<br><br>
+<b>Why this is needed:</b>
+<pre>// This FAILS — head is copied, original unchanged:
+void broken_insert(struct node* head, int val) {
+  struct node* n = malloc(sizeof(struct node));
+  n->val = val; n->next = head;
+  head = n;  // only changes the local copy!
+}
+
+// FIX — pass pointer to the head pointer:
+void insert_head(struct node** head, int val) {
+  struct node* n = malloc(sizeof(struct node));
+  n->val = val;
+  n->next = *head;  // new node points to current head
+  *head = n;        // update the caller's head pointer
+}
+
+// Usage:
+struct node* head = NULL;
+insert_head(&head, 42); // pass ADDRESS of head pointer
+insert_head(&head, 99);</pre>
+<b>Reading the type:</b> <code>struct node** head</code> — head is a pointer to a pointer to struct node.<br>
+<code>*head</code> = the head pointer itself.<br>
+<code>**head</code> = the value in the first node.<br><br>
+<b>Same pattern for return-by-pointer-parameter:</b> Any time a function needs to modify a pointer variable in the caller, pass <code>&pointer</code>.`},
+
+{u:'DataStructs',q:'Linked List: Full Implementation (Insert, Delete, Free)',
+a:`<pre>struct node { int val; struct node* next; };
+
+// Insert at head — returns new head
+struct node* insert_head(struct node* head, int val) {
+  struct node* n = malloc(sizeof(struct node));
+  if (!n) return head;  // malloc failed
+  n->val  = val;
+  n->next = head;
+  return n;  // caller updates their head pointer
+}
+
+// Delete first node with given value — returns new head
+struct node* delete_node(struct node* head, int val) {
+  if (!head) return NULL;
+  if (head->val == val) {       // deleting the head
+    struct node* next = head->next;
+    free(head);
+    return next;
+  }
+  struct node* curr = head;
+  while (curr->next && curr->next->val != val)
+    curr = curr->next;
+  if (curr->next) {             // found it
+    struct node* tmp = curr->next;
+    curr->next = tmp->next;
+    free(tmp);
+  }
+  return head;
+}
+
+// Free entire list
+void free_list(struct node* head) {
+  while (head) {
+    struct node* next = head->next; // save next BEFORE free
+    free(head);
+    head = next;
+  }
+}</pre>`},
+
+{u:'DataStructs',q:'BST: Insert Node',
+a:`<b>Recursive insert</b> — returns the (possibly new) root:
+<pre>struct node {
+  int val;
+  struct node *left, *right;
+};
+
+struct node* insert(struct node* root, int val) {
+  if (!root) {                   // found the insertion point
+    struct node* n = malloc(sizeof(struct node));
+    if (!n) return NULL;
+    n->val   = val;
+    n->left  = NULL;
+    n->right = NULL;
+    return n;
+  }
+  if (val &lt; root->val)
+    root->left  = insert(root->left,  val); // go left
+  else if (val > root->val)
+    root->right = insert(root->right, val); // go right
+  // val == root->val: duplicate, do nothing
+  return root;
+}
+
+// Free entire BST (post-order: free children before parent)
+void free_bst(struct node* root) {
+  if (!root) return;
+  free_bst(root->left);
+  free_bst(root->right);
+  free(root);
+}</pre>
+<b>Key rule:</b> Always return root — the recursive call assigns back to the child pointer, keeping the tree connected.`},
+
+{u:'DataStructs',q:'Dynamic Array: Grow with realloc',
+a:`When you need an array whose size grows as elements are added:<br><br>
+<pre>#include &lt;stdlib.h&gt;
+#include &lt;stdio.h&gt;
+
+int main() {
+  int  cap  = 4;               // current capacity
+  int  size = 0;               // current number of elements
+  int* arr  = malloc(cap * sizeof(int));
+  if (!arr) return 1;
+
+  for (int i = 0; i &lt; 10; i++) {
+    if (size == cap) {          // need more space
+      cap *= 2;                 // double capacity
+      int* tmp = realloc(arr, cap * sizeof(int));
+      if (!tmp) { free(arr); return 1; } // realloc failed!
+      arr = tmp;                // update pointer — old ptr INVALID
+    }
+    arr[size++] = i * i;
+  }
+
+  for (int i = 0; i &lt; size; i++)
+    printf("%d ", arr[i]);     // 0 1 4 9 16 25 36 49 64 81
+  free(arr);
+  return 0;
+}</pre>
+<b>realloc rules:</b>
+<ul>
+<li>May return a new pointer (data is copied) — never use old pointer after realloc</li>
+<li>Returns NULL on failure — always save to a temp pointer first</li>
+<li>If new size is 0, behaves like free</li>
+</ul>`},
+
+{u:'Debugging',q:'String Safety and Buffer Overflow',
+a:`<b>Buffer overflow:</b> Writing more data into a buffer than it can hold — overwrites adjacent memory.
+<pre>char buf[8];
+strcpy(buf, "Hello, World!"); // BUG: 14 bytes into 8-byte buffer!
+                               // overwrites memory past buf → UB/crash</pre>
+<b>Safe alternatives:</b>
+<pre>// strncpy — copies at most n bytes (but may not null-terminate!)
+strncpy(buf, src, sizeof(buf) - 1);
+buf[sizeof(buf) - 1] = '\0';  // always null-terminate manually
+
+// snprintf — safest for formatted strings
+snprintf(buf, sizeof(buf), "%s", src); // always null-terminates</pre>
+<b>gets() — NEVER USE:</b>
+<pre>gets(buf);    // NEVER — reads unlimited input, guaranteed overflow
+fgets(buf, sizeof(buf), stdin); // FIX: use fgets with size limit</pre>
+<b>Why buffer overflows are dangerous:</b>
+<ul>
+<li>Can overwrite return addresses on the stack → arbitrary code execution</li>
+<li>Classic security vulnerability (stack smashing)</li>
+<li>May corrupt other variables silently</li>
+</ul>
+<b>Off-by-one in strings:</b> A string of length n needs n+1 bytes (for <code>'\0'</code>).
+<pre>char s[5] = "hello"; // BUG: needs 6 bytes!
+char s[6] = "hello"; // OK</pre>`},
+
+{u:'Debugging',q:'Reading and Tracing Memory: Worked Example',
+a:`Given this code — trace what happens step by step:
+<pre>int main() {
+  int x = 10;           // stack: x=10  at 0x1000
+  int* p = &x;          // stack: p=0x1000 at 0x1008
+  *p = 20;              // x is now 20
+  printf("%d\n", x);    // prints 20
+
+  int* q = malloc(sizeof(int)); // heap: new int at 0x5000
+  *q = 99;
+  p = q;                // p now points to heap (0x5000)
+  *p = 42;              // heap value is now 42
+  printf("%d\n", *q);   // prints 42
+
+  free(q);              // heap memory at 0x5000 freed
+  q = NULL;             // safe: prevent use-after-free
+  // *p now DANGLING — p still points to 0x5000 (freed!)
+  // p = NULL;          // would fix this
+}</pre>
+<b>Key tracing rules:</b>
+<ul>
+<li><code>int* p = &x</code> → p holds the address of x</li>
+<li><code>*p = val</code> → writes to wherever p points</li>
+<li><code>p = q</code> → p now points to the same place as q (address is copied)</li>
+<li>After <code>free(q)</code>, both p and q are dangling if not set to NULL</li>
+</ul>`},
+
+{u:'Concurrency',q:'Complete pthreads Program: Shared Counter',
+a:`Full working example — 4 threads each increment a shared counter 100,000 times:
+<pre>#include &lt;stdio.h&gt;
+#include &lt;pthread.h&gt;
+
+#define NUM_THREADS 4
+#define INCREMENTS  100000
+
+int counter = 0;
+pthread_mutex_t lock = PTHREAD_MUTEX_INITIALIZER;
+
+void* increment(void* arg) {
+  for (int i = 0; i &lt; INCREMENTS; i++) {
+    pthread_mutex_lock(&lock);
+    counter++;              // critical section
+    pthread_mutex_unlock(&lock);
+  }
+  return NULL;
+}
+
+int main() {
+  pthread_t threads[NUM_THREADS];
+
+  for (int i = 0; i &lt; NUM_THREADS; i++)
+    pthread_create(&threads[i], NULL, increment, NULL);
+
+  for (int i = 0; i &lt; NUM_THREADS; i++)
+    pthread_join(threads[i], NULL);
+
+  printf("Counter: %d\n", counter); // always 400000
+  pthread_mutex_destroy(&lock);
+  return 0;
+}
+// Compile: clang -Wall -Werror prog.c -lpthread -o prog</pre>
+<b>Without the mutex:</b> counter would be less than 400,000 — lost updates from race conditions.`},
+
+{u:'Concurrency',q:'Complete Producer-Consumer: pthreads (Full Code)',
+a:`<pre>#include &lt;pthread.h&gt;
+#include &lt;stdio.h&gt;
+#define N 5    // buffer size
+#define ITEMS 10
+
+int buf[N], count = 0;
+pthread_mutex_t lock     = PTHREAD_MUTEX_INITIALIZER;
+pthread_cond_t  not_full  = PTHREAD_COND_INITIALIZER;
+pthread_cond_t  not_empty = PTHREAD_COND_INITIALIZER;
+
+void* producer(void* arg) {
+  for (int i = 0; i &lt; ITEMS; i++) {
+    pthread_mutex_lock(&lock);
+    while (count == N)                    // wait while full
+      pthread_cond_wait(&not_full, &lock);
+    buf[count++] = i;
+    printf("Produced %d (count=%d)\n", i, count);
+    pthread_cond_signal(&not_empty);      // wake a consumer
+    pthread_mutex_unlock(&lock);
+  }
+  return NULL;
+}
+
+void* consumer(void* arg) {
+  for (int i = 0; i &lt; ITEMS; i++) {
+    pthread_mutex_lock(&lock);
+    while (count == 0)                    // wait while empty
+      pthread_cond_wait(&not_empty, &lock);
+    int item = buf[--count];
+    printf("Consumed %d (count=%d)\n", item, count);
+    pthread_cond_signal(&not_full);       // wake a producer
+    pthread_mutex_unlock(&lock);
+  }
+  return NULL;
+}
+
+int main() {
+  pthread_t p, c;
+  pthread_create(&p, NULL, producer, NULL);
+  pthread_create(&c, NULL, consumer, NULL);
+  pthread_join(p, NULL);
+  pthread_join(c, NULL);
+}</pre>`},
+
+{u:'Concurrency',q:'Race Condition: Identify and Fix',
+a:`<b>Broken code (race condition):</b>
+<pre>int balance = 1000;
+pthread_mutex_t lock = PTHREAD_MUTEX_INITIALIZER;
+
+// Thread 1 — withdraw
+void withdraw(int amount) {
+  if (balance >= amount) {      // BUG: check and update
+    balance -= amount;          //      are not atomic!
+  }
+}
+// Thread 2 can read balance BETWEEN the check and update:
+// T1 checks: balance=1000 >= 900 ✓
+// T2 checks: balance=1000 >= 900 ✓
+// T1 deducts: balance = 100
+// T2 deducts: balance = -800  ← WRONG!</pre>
+<b>Fixed code:</b>
+<pre>void withdraw(int amount) {
+  pthread_mutex_lock(&lock);
+  if (balance >= amount) {      // check AND update protected
+    balance -= amount;
+  }
+  pthread_mutex_unlock(&lock);
+}</pre>
+<b>Rule:</b> Any sequence of operations that must appear atomic to other threads must be entirely inside a mutex-protected critical section. The check-then-act pattern is almost always a race condition without a lock.`},
+
+{u:'Concurrency',q:'Deadlock: Identify and Fix',
+a:`<b>Deadlocked code:</b>
+<pre>pthread_mutex_t lockA = PTHREAD_MUTEX_INITIALIZER;
+pthread_mutex_t lockB = PTHREAD_MUTEX_INITIALIZER;
+
+void* thread1(void* arg) {
+  pthread_mutex_lock(&lockA);   // acquires A
+  sleep(1);
+  pthread_mutex_lock(&lockB);   // waits for B — DEADLOCK
+  // ... work ...
+  pthread_mutex_unlock(&lockB);
+  pthread_mutex_unlock(&lockA);
+  return NULL;
+}
+
+void* thread2(void* arg) {
+  pthread_mutex_lock(&lockB);   // acquires B
+  sleep(1);
+  pthread_mutex_lock(&lockA);   // waits for A — DEADLOCK
+  // ...
+}</pre>
+<b>Fix 1 — consistent lock ordering (always A before B):</b>
+<pre>void* thread2(void* arg) {
+  pthread_mutex_lock(&lockA);   // acquire A first
+  pthread_mutex_lock(&lockB);   // then B
+  // ... now both threads acquire in same order: no cycle
+}</pre>
+<b>Fix 2 — trylock with backoff:</b>
+<pre>if (pthread_mutex_trylock(&lockB) != 0) {
+  pthread_mutex_unlock(&lockA); // release what we hold
+  // retry later
+}</pre>`},
+
+{u:'Concurrency',q:'volatile Keyword',
+a:`<code>volatile</code> tells the compiler: <em>"this variable may change at any time outside normal program flow — do not cache it in a register, always read from memory."</em><br><br>
+<b>Without volatile — compiler may optimise away the loop:</b>
+<pre>int done = 0;
+
+void* worker(void* arg) {
+  while (!done) { /* spin */ }  // compiler might cache 'done'
+  return NULL;                  // in a register → never sees update!
+}
+
+// FIX:
+volatile int done = 0;          // always re-read from memory</pre>
+<b>Use cases:</b>
+<ul>
+<li>Hardware registers (memory-mapped I/O)</li>
+<li>Signal handlers modifying shared variables</li>
+<li>Variables checked in a spin-wait loop</li>
+</ul>
+<b>Important limitations:</b>
+<ul>
+<li><code>volatile</code> does <em>NOT</em> make operations atomic</li>
+<li><code>volatile</code> does <em>NOT</em> provide mutual exclusion</li>
+<li>For thread-safe shared state use <b>mutexes</b> + <b>atomics</b>, not just volatile</li>
+<li>In C++, prefer <code>std::atomic</code> for shared variables between threads</li>
+</ul>`},
+
+{u:'Sync',q:'Semaphore: Complete Producer-Consumer Example',
+a:`Using POSIX semaphores to solve producer-consumer (alternative to condition variables):<br><br>
+<pre>#include &lt;semaphore.h&gt;
+#include &lt;pthread.h&gt;
+#include &lt;stdio.h&gt;
+#define N 5
+
+int buf[N];
+int in = 0, out = 0;
+
+sem_t empty;   // counts empty slots (init = N)
+sem_t full;    // counts filled slots (init = 0)
+sem_t mutex;   // binary semaphore for mutual exclusion
+
+void* producer(void* arg) {
+  for (int i = 0; i &lt; 10; i++) {
+    sem_wait(&empty);   // wait for an empty slot
+    sem_wait(&mutex);   // enter critical section
+    buf[in] = i;
+    in = (in + 1) % N;
+    sem_post(&mutex);   // exit critical section
+    sem_post(&full);    // signal one more item available
+  }
+  return NULL;
+}
+
+void* consumer(void* arg) {
+  for (int i = 0; i &lt; 10; i++) {
+    sem_wait(&full);    // wait for an item
+    sem_wait(&mutex);
+    int item = buf[out];
+    out = (out + 1) % N;
+    sem_post(&mutex);
+    sem_post(&empty);   // signal one more empty slot
+    printf("Consumed %d\n", item);
+  }
+  return NULL;
+}
+
+int main() {
+  sem_init(&empty, 0, N); // N empty slots
+  sem_init(&full,  0, 0); // 0 full slots
+  sem_init(&mutex, 0, 1); // binary semaphore
+  pthread_t p, c;
+  pthread_create(&p, NULL, producer, NULL);
+  pthread_create(&c, NULL, consumer, NULL);
+  pthread_join(p, NULL); pthread_join(c, NULL);
+  sem_destroy(&empty); sem_destroy(&full); sem_destroy(&mutex);
+}</pre>`},
+
+{u:'CppThreads',q:'lock_guard vs unique_lock: When to Use Each',
+a:`Both are RAII wrappers that automatically unlock when they go out of scope.<br><br>
+<b>std::lock_guard — simple, no overhead:</b>
+<pre>std::mutex mtx;
+{
+  std::lock_guard&lt;std::mutex&gt; guard(mtx);
+  // mutex locked here
+  shared_data++;
+} // automatically unlocked — cannot be manually unlocked</pre>
+<b>std::unique_lock — flexible:</b>
+<pre>std::unique_lock&lt;std::mutex&gt; lk(mtx);
+// Can be manually locked/unlocked:
+lk.unlock();
+// ... do work without lock ...
+lk.lock();
+// REQUIRED for condition variables:
+cv.wait(lk, []{ return ready; });  // wait releases lock</pre>
+<b>Rule:</b> Use <code>lock_guard</code> by default. Use <code>unique_lock</code> when you need condition variables, deferred locking, or manual unlock.<br><br>
+<b>std::scoped_lock (C++17) — locks multiple mutexes atomically:</b>
+<pre>std::scoped_lock lock(mutexA, mutexB); // deadlock-free!</pre>
+<b>std::timed_mutex</b> — try to lock with a timeout:
+<pre>if (mtx.try_lock_for(std::chrono::milliseconds(100))) {
+  // got the lock
+  mtx.unlock();
+}</pre>`},
+
+{u:'CppThreads',q:'C++ Complete Threading Example',
+a:`Full producer-consumer using C++ threads, mutex, and condition variable:
+<pre>#include &lt;thread&gt;
+#include &lt;mutex&gt;
+#include &lt;condition_variable&gt;
+#include &lt;queue&gt;
+#include &lt;iostream&gt;
+
+std::mutex mtx;
+std::condition_variable cv;
+std::queue&lt;int&gt; buffer;
+const int MAX = 5;
+bool done = false;
+
+void producer() {
+  for (int i = 0; i &lt; 10; i++) {
+    std::unique_lock&lt;std::mutex&gt; lk(mtx);
+    cv.wait(lk, []{ return buffer.size() &lt; MAX; }); // wait if full
+    buffer.push(i);
+    std::cout &lt;&lt; "Produced " &lt;&lt; i &lt;&lt; "\n";
+    cv.notify_all();
+  }
+  std::unique_lock&lt;std::mutex&gt; lk(mtx);
+  done = true;
+  cv.notify_all();
+}
+
+void consumer() {
+  while (true) {
+    std::unique_lock&lt;std::mutex&gt; lk(mtx);
+    cv.wait(lk, []{ return !buffer.empty() || done; });
+    if (buffer.empty()) break;
+    int item = buffer.front(); buffer.pop();
+    std::cout &lt;&lt; "Consumed " &lt;&lt; item &lt;&lt; "\n";
+    cv.notify_all();
+  }
+}
+
+int main() {
+  std::thread p(producer), c(consumer);
+  p.join(); c.join();
+}</pre>`},
+
+{u:'Memory',q:'Common Pointer Mistakes: Quick Reference',
+a:`<b>1. Uninitialised pointer (garbage address):</b>
+<pre>int* p;        // p contains random garbage
+*p = 5;        // CRASH — writing to unknown address
+int* p = NULL; // FIX: always initialise</pre>
+<b>2. Off-by-one past array end:</b>
+<pre>int arr[5];
+int* p = arr + 5; // points one past end — valid address
+*p = 1;           // ILLEGAL — dereferencing past end is UB</pre>
+<b>3. Losing the only pointer to heap memory:</b>
+<pre>int* p = malloc(sizeof(int));
+p = malloc(sizeof(int)); // original block LEAKED forever!</pre>
+<b>4. Returning address of local variable:</b>
+<pre>int* bad() { int x = 5; return &x; } // x freed on return!</pre>
+<b>5. Pointer arithmetic on wrong type:</b>
+<pre>char* cp = (char*)int_ptr;
+cp++;   // moves 1 byte
+// vs int_ptr++ which moves 4 bytes — easy to confuse</pre>
+<b>6. Using memcmp/memcpy with wrong size:</b>
+<pre>int a[3]; int b[3];
+memcpy(b, a, 3);               // BUG: copies 3 bytes, not 3 ints!
+memcpy(b, a, 3 * sizeof(int)); // FIX</pre>`},
+
+{u:'Ownership',q:'Rule of Three / Rule of Five (C++)',
+a:`If a C++ class manages a resource (owns heap memory), you must explicitly define three (or five) special member functions. Relying on the compiler-generated defaults causes double-free or shallow copy bugs.<br><br>
+<b>Rule of Three (C++03):</b>
+<ul>
+<li><b>Destructor</b> — frees the resource</li>
+<li><b>Copy constructor</b> — deep copy</li>
+<li><b>Copy assignment operator</b> — deep copy</li>
+</ul>
+<b>Rule of Five (C++11+):</b> Add also:
+<ul>
+<li><b>Move constructor</b> — transfer ownership (no copy)</li>
+<li><b>Move assignment operator</b> — transfer ownership</li>
+</ul>
+<b>Example — shallow copy bug:</b>
+<pre>struct Bad {
+  int* data;
+  Bad(int v) { data = new int(v); }
+  ~Bad() { delete data; }  // destructor defined
+  // no copy constructor → compiler generates SHALLOW copy:
+};
+Bad a(5);
+Bad b = a;      // b.data == a.data — same pointer!
+// both destructors call delete on same address → DOUBLE FREE crash!</pre>
+<b>Rule of Zero:</b> Prefer using smart pointers / containers so no manual resource management is needed — then you need none of the five.`},
+
+{u:'Energy',q:'Cache-Friendly Code and Energy Efficiency',
+a:`<b>Memory access patterns dominate energy cost.</b> The CPU cache stores recently accessed data. Cache hits are fast and cheap; cache misses require fetching from DRAM (~100ns, ~175× slower).<br><br>
+<b>Row-major access (cache-friendly):</b>
+<pre>// C stores 2D arrays in row-major order: row 0, then row 1, ...
+int matrix[1000][1000];
+
+// GOOD: access elements in storage order (sequential)
+for (int i = 0; i &lt; 1000; i++)
+  for (int j = 0; j &lt; 1000; j++)
+    matrix[i][j] = 0;  // sequential — cache-friendly
+
+// BAD: access column-by-column (jumps 1000 ints = 4KB between accesses)
+for (int j = 0; j &lt; 1000; j++)
+  for (int i = 0; i &lt; 1000; i++)
+    matrix[i][j] = 0;  // strided — many cache misses!</pre>
+<b>Other energy-saving practices:</b>
+<ul>
+<li>Use <code>int</code> instead of <code>double</code> when decimals not needed</li>
+<li>Pack related data together in structs (struct of arrays vs array of structs)</li>
+<li>Avoid pointer chasing in linked lists (each node access is a potential cache miss)</li>
+<li>Prefer contiguous arrays over linked lists for sequential access</li>
+</ul>`},
+
+{u:'Sync',q:'Readers-Writers Problem',
+a:`<b>Problem:</b> A shared resource can be read by multiple threads simultaneously, but writing requires exclusive access.<br><br>
+<b>Rules:</b>
+<ul>
+<li>Multiple readers can read at the same time</li>
+<li>Only one writer can write at a time</li>
+<li>No readers while a writer is writing</li>
+</ul>
+<b>Solution using mutex + condition variables:</b>
+<pre>int readers = 0;
+pthread_mutex_t lock = PTHREAD_MUTEX_INITIALIZER;
+pthread_cond_t  ok_to_write = PTHREAD_COND_INITIALIZER;
+pthread_cond_t  ok_to_read  = PTHREAD_COND_INITIALIZER;
+int writing = 0;
+
+void read_lock() {
+  pthread_mutex_lock(&lock);
+  while (writing) pthread_cond_wait(&ok_to_read, &lock);
+  readers++;
+  pthread_mutex_unlock(&lock);
+}
+void read_unlock() {
+  pthread_mutex_lock(&lock);
+  readers--;
+  if (readers == 0) pthread_cond_signal(&ok_to_write);
+  pthread_mutex_unlock(&lock);
+}
+void write_lock() {
+  pthread_mutex_lock(&lock);
+  while (writing || readers > 0)
+    pthread_cond_wait(&ok_to_write, &lock);
+  writing = 1;
+  pthread_mutex_unlock(&lock);
+}
+void write_unlock() {
+  pthread_mutex_lock(&lock);
+  writing = 0;
+  pthread_cond_broadcast(&ok_to_read); // wake all waiting readers
+  pthread_cond_signal(&ok_to_write);
+  pthread_mutex_unlock(&lock);
+}</pre>`},
+
+];
+
+
+// ── ENGINE ────────────────────────────────────────────────────────────────────
+
+let activeUnit='all', deck=[...ALL_CARDS], idx=0, flipped=false, touchStartX=0;
+
+function unitLabel(id){return(UNITS.find(u=>u.id===id)||{}).label||id;}
+function esc(s){return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+
+function updateCounter(){
+  const el=document.getElementById('topCounter');
+  if(el&&deck.length)el.innerHTML='<span>'+(idx+1)+'</span> / '+deck.length;
+}
+
+function renderCard(dir){
+  const card=deck[idx];
+  document.getElementById('main').innerHTML=
+    '<div class="progress-bar"><div class="progress-fill" style="width:'+((idx+1)/deck.length*100)+'%"></div></div>'+
+    '<div class="card-scene" id="cardScene">'+
+    '<div class="card'+(flipped?' flipped':'')+'" id="theCard">'+
+    '<div class="card-face card-front">'+
+    '<div class="card-header"><div class="card-type">Topic</div><div class="card-unit">'+esc(unitLabel(card.u))+'</div></div>'+
+    '<div class="card-body"><div class="card-text">'+esc(card.q)+'</div></div>'+
+    '<div class="card-mark">?</div>'+
+    '<div class="card-hint">tap card &middot; press flip &middot; swipe</div>'+
+    '</div>'+
+    '<div class="card-face card-back">'+
+    '<div class="card-header"><div class="card-type">Detail</div><div class="card-unit">'+esc(unitLabel(card.u))+'</div></div>'+
+    '<div class="card-body"><div class="card-text">'+card.a+'</div></div>'+
+    '<div class="card-mark">&bull;</div>'+
+    '</div></div></div>'+
+    '<div class="nav">'+
+    '<button class="nav-btn" id="prevBtn">&#8592;</button>'+
+    '<button class="flip-btn" id="flipBtn">'+(flipped?'unflip':'flip')+'</button>'+
+    '<button class="nav-btn" id="nextBtn">&#8594;</button>'+
+    '</div>'+
+    '<div class="swipe-hint">&#8592; &#8594; arrow keys &middot; space to flip</div>';
+
+  updateCounter();
+
+  if(dir){
+    const s=document.getElementById('cardScene');
+    s.classList.add(dir===1?'slide-right':'slide-left');
+    setTimeout(function(){s.classList.remove('slide-right','slide-left');},300);
+  }
+
+  document.getElementById('theCard').addEventListener('click',toggleFlip);
+  document.getElementById('flipBtn').addEventListener('click',toggleFlip);
+  document.getElementById('prevBtn').addEventListener('click',function(){navigate(-1);});
+  document.getElementById('nextBtn').addEventListener('click',function(){navigate(1);});
+
+  const sc=document.getElementById('cardScene');
+  sc.addEventListener('touchstart',function(e){touchStartX=e.touches[0].clientX;},{passive:true});
+  sc.addEventListener('touchend',function(e){const dx=touchStartX-e.changedTouches[0].clientX;if(Math.abs(dx)>50)navigate(dx>0?1:-1);});
+}
+
+function toggleFlip(){
+  flipped=!flipped;
+  const c=document.getElementById('theCard');
+  if(c)c.classList.toggle('flipped',flipped);
+  const b=document.getElementById('flipBtn');
+  if(b)b.textContent=flipped?'unflip':'flip';
+}
+
+function navigate(dir){idx=((idx+dir)+deck.length)%deck.length;flipped=false;renderCard(dir);}
+
+function renderUnitStrip(){
+  const strip=document.getElementById('unitStrip');
+  strip.innerHTML=UNITS.map(function(u){
+    return '<button class="unit-tab'+(u.id===activeUnit?' active':'')+'" data-id="'+u.id+'">'+u.label+'</button>';
+  }).join('');
+  strip.querySelectorAll('.unit-tab').forEach(function(btn){
+    btn.addEventListener('click',function(){
+      activeUnit=btn.dataset.id;
+      deck=activeUnit==='all'?ALL_CARDS.slice():ALL_CARDS.filter(function(c){return c.u===activeUnit;});
+      idx=0;flipped=false;
+      strip.querySelectorAll('.unit-tab').forEach(function(b){b.classList.remove('active');});
+      btn.classList.add('active');
+      renderCard(null);
+    });
+  });
+}
+
+document.addEventListener('keydown',function(e){
+  if(e.key==='ArrowRight')navigate(1);
+  else if(e.key==='ArrowLeft')navigate(-1);
+  else if(e.key===' '||e.key==='Enter'){e.preventDefault();toggleFlip();}
+});
+
+renderUnitStrip();
+renderCard(null);
+</script>
+</body>
+</html>
